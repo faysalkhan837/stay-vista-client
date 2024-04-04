@@ -88,7 +88,7 @@ const Sidebar = () => {
           <MenuItem
             icon={FcSettings}
             label='Profile'
-            address='/dashboard/profile'
+            address='profile'
           />
           <button onClick={logOut} className='flex w-full items-center px-4 py-2 mt-5 text-gray-600 hover:bg-gray-300   hover:text-gray-700 transition-colors duration-300 transform'>
             <GrLogout className='w-5 h-5' />

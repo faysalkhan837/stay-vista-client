@@ -2,9 +2,17 @@ import { formatDistance } from "date-fns";
 import Button from "../../Components/Button/Button";
 import Calender from "./Calender/Calender";
 import { useState } from "react";
+import BookingModal from "../../Components/Modal/BookingModal";
+import UseAuth from "../../Hooks/UseAuth";
 
 
 const RoomReservation = ({ room }) => {
+    const {user} = UseAuth();
+    let [isOpen, setIsOpen] = useState(false)
+    const closeModal = () =>{
+        setIsOpen(false)
+    }
+
     const [value, setValue] = useState({
         startDate: new Date(room?.from),
         endDate: new Date(room?.to),
@@ -14,8 +22,24 @@ const RoomReservation = ({ room }) => {
     const totalDays = parseInt(
         formatDistance(new Date(room?.to), new Date(room?.from)).split(' ')[0]
     )
+    
     // Total price......
     const totalPrice = totalDays * room?.price;
+    const [bookingInfo, setBookingInfo] = useState({
+        guest: {
+            name: user?.displayName,
+            email: user?.email,
+            image: user?.photoURL
+        },
+        host: room?.host?.email,
+        location: room?.location,
+        price: totalPrice,
+        to: value.endDate,
+        from: value.startDate,
+        title: room?.title,
+        roomId: room?._id,
+        image: room?.image
+    })
 
 
     return (
@@ -30,13 +54,14 @@ const RoomReservation = ({ room }) => {
             </div>
             <hr />
             <div className="p-4">
-                <Button label={'Reserve'}></Button>
+                <Button onClick={() =>setIsOpen(true)} label={'Reserve'}></Button>
             </div>
             <hr />
             <div className="p-4 flex items-center justify-between font-semibold text-lg">
                 <div>Total</div>
                 <div>$ {totalPrice}</div>
             </div>
+            <BookingModal closeModal={closeModal} isOpen={isOpen} bookingInfo={bookingInfo}></BookingModal>
         </div>
     );
 };
