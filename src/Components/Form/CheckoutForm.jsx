@@ -3,6 +3,10 @@ import { useState } from 'react'
 import './CheckoutForm.css'
 import UseAuth from '../../Hooks/UseAuth'
 import { ImSpinner9 } from 'react-icons/im'
+import { useEffect } from 'react'
+import { createPaymentIntent, saveBookingIngs, updateStatus } from '../../api/bookings'
+import tost from 'react-hot-toast';
+// import { useNavigate } from 'react-router-dom';
 
 const CheckoutForm = ({ bookingInfo, closeModal }) => {
   const stripe = useStripe()
@@ -11,8 +15,19 @@ const CheckoutForm = ({ bookingInfo, closeModal }) => {
   const [cardError, setCardError] = useState('')
   const [clientSecret, setClientSecret] = useState('')
   const [processing, setProcessing] = useState(false)
+  // const navigate = useNavigate();
+  
 
   // Create Payment Intent
+  useEffect(() => {
+    if (bookingInfo.price > 0) {
+      createPaymentIntent({ price: bookingInfo.price })
+        .then(data => {
+          console.log(data.clientSecret)
+          setClientSecret(data.clientSecret)
+        })
+    }
+  }, [bookingInfo])
 
   const handleSubmit = async event => {
     event.preventDefault()
@@ -59,17 +74,31 @@ const CheckoutForm = ({ bookingInfo, closeModal }) => {
 
     console.log('payment intent', paymentIntent)
 
+    // ekane taka katbe......
     if (paymentIntent.status === 'succeeded') {
-      // save payment information to the server
-      // Update room status in db
       const paymentInfo = {
         ...bookingInfo,
         transactionId: paymentIntent.id,
-        date: new Date(),  
+        date: new Date(),
       }
+      try {
+        // save payment information to the 
+        await saveBookingIngs(paymentInfo)
 
-      setProcessing(false)
+        // Updatedb room status in 
+        await updateStatus(bookingInfo.roomId, true)
+        const text = `Booking successfull: ${paymentIntent.id}`
+        tost.success(text);
+        // navigate('/dashboard/my-bookings')
+      }catch(error){
+        console.log(error);
+        tost.error(error.message)
+      }finally{
+        setProcessing(false)
+      }
+     
     }
+    setProcessing(false)
   }
 
   return (

@@ -8,6 +8,7 @@ import CheckoutForm from '../Form/CheckoutForm'
 const stripePromise = loadStripe(import.meta.env.VITE_PAYMENT_GATEWAY_PK)
 const BookingModal = ({ closeModal, isOpen, bookingInfo }) => {
   return (
+    // Modal from headlessui......
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-10' onClose={closeModal}>
         <Transition.Child
